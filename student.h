@@ -23,8 +23,13 @@ struct Field {
   static const std::vector<std::string> FieldTypes;
   std::string name;
   Var value;
-  Field(const std::string &fieldName, const Var fieldValue)
-      : name(fieldName), value(fieldValue) {}
+  template <typename T1, typename T2>
+  requires std::is_convertible_v<T1, decltype(name)> &&
+      std::is_convertible_v<T2, decltype(value)>
+      Field(T1 &&fieldName, T2 &&fieldValue)
+  noexcept
+      : name(std::forward<T1>(fieldName)), value(std::forward<T2>(fieldValue)) {
+  }
   bool operator==(const Field &rValue) const noexcept {
     return rValue.name == name && rValue.value == value;
   }
@@ -60,14 +65,20 @@ struct Field {
 class Student {
 public:
   constexpr static std::size_t MaxFieldNumber = 128;
-  void addField(const Field &field) { // 如果已存在field，则不会添加
+  template <typename T>
+  requires std::is_convertible_v<T, Field>
+  void addField(T &&field) {
     if (studentInfo.size() < MaxFieldNumber &&
         !findField(field.name).has_value()) {
-      studentInfo.emplace_back(field);
+      studentInfo.emplace_back(std::forward<T>(field));
     }
   }
-  void addField(const std::string &fieldName, const Field::Var &value) {
-    addField({fieldName, value});
+  // perfect forward，the type of fieldName and value is a reference.
+  template <typename T1, typename T2>
+  requires std::is_convertible_v<T1, std::string> &&
+      std::is_convertible_v<T2, Field::Var>
+  void addField(T1 &&fieldName, T2 &&value) {
+    addField(Field(std::forward<T1>(fieldName), std::forward<T2>(value)));
   }
   void removeField(const std::string &fieldName) {
     auto it = findField(fieldName);
@@ -95,13 +106,14 @@ public:
   Field::Var &operator[](const std::string &fieldName) {
     return getFieldValue(fieldName);
   }
-  template <typename T>
-  requires std::is_same_v<T, int> || std::is_same_v<T, double> ||
-      std::is_same_v<T, std::string> || std::is_same_v<T, bool>
-  void setFieldValue(const std::string &fieldName, const T value) {
+  template <typename T1, typename T2>
+  requires(std::is_same_v<T2, int> || std::is_same_v<T2, double> ||
+           std::is_same_v<T2, std::string> || std::is_same_v<T2, bool>) &&
+      std::is_convertible_v<T1, std::string> void setFieldValue(T1 &&fieldName,
+                                                                T2 &&value) {
     if (!isExist(fieldName)) {
       // 不存在字段则自动创建
-      addField({fieldName, value});
+      addField(Field(std::forward<T1>(fieldName), std::forward<T2>(value)));
       return;
     }
     auto it = findField(fieldName);
@@ -113,15 +125,16 @@ public:
     for (const auto &field : studentInfo) {
       result.emplace_back(field.name);
     }
-    return result.size() ? std::optional<std::vector<std::string>>(result)
-                         : std::nullopt;
+    return result.size()
+               ? std::optional<std::vector<std::string>>(std::move(result))
+               : std::nullopt;
   }
   std::optional<std::vector<int>> getFieldTypeIndexs() const {
     std::vector<int> result;
     for (const auto &field : studentInfo) {
       result.emplace_back(field.value.index());
     }
-    return result.size() ? std::optional<std::vector<int>>(result)
+    return result.size() ? std::optional<std::vector<int>>(std::move(result))
                          : std::nullopt;
     ;
   }

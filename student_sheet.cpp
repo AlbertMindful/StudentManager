@@ -72,7 +72,7 @@ static void writeRecord(std::ostream &out,
   const std::vector<int> &fieldIndexs = indexs.value();
   for (size_t i = 0; i < stu.size(); ++i) {
     auto fieldValue = stu.getFieldValue(fieldNames[i]);
-    out << fieldNames[i] << " " << std::get<fieldIndexs[i]>(fieldValue);
+    // TODO
   }
 }
 

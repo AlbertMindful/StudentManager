@@ -11,9 +11,13 @@
 
 class StudentSheet {
 public:
-  StudentSheet(const std::string &sheetName, const Student &stuTemplate,
+  StudentSheet(const std::string &sheetName, const Student &studentTemplate,
                const std::string &keyField)
-      : name(sheetName), studentTemplate(stuTemplate), keyField(keyField) {}
+      : name(sheetName), studentTemplate(studentTemplate), keyField(keyField) {}
+  StudentSheet(std::string &&sheetName, Student &&studentTemplate,
+               std::string &&keyField)
+      : name(std::move(sheetName)), studentTemplate(std::move(studentTemplate)),
+        keyField(std::move(keyField)) {}
   void print(std::ostream &out = std::cout) const;
   void clear(); //删除此sheet中的所有学生信息以及sheetName.dat
   void read();  //从sheetName.dat中读取学生信息

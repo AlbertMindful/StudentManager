@@ -14,9 +14,9 @@ TEST_F(StudentTest, AddFieldNotToExist_SizeImcreaseByOne) {
 }
 
 TEST_F(StudentTest, AddFieldToExist_SizeUnchange) {
-  stu2.addField({"name", "jay"});
+  stu2.addField(Field("name", "jay"));
   EXPECT_EQ(stu2.size(), 1);
-  stu3.addField({"age", 20});
+  stu3.addField(Field("age", 20));
   EXPECT_EQ(stu3.size(), 2);
 }
 

@@ -3,7 +3,8 @@
 #include "student_database.h"
 #include <iostream>
 
-using namespace std;
+using std::cout;
+using std::endl;
 
 void showMainMenu() {
   cout << "-------学生管理系统--------\n";
